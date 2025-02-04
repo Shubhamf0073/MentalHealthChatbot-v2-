@@ -1,0 +1,10 @@
+faiss-cpu
+torch
+pinecone-client
+numpy
+pandas
+seaborn
+streamlit
+matplotlib
+transformers
+sentence-transformers
