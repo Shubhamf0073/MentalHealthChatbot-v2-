@@ -10,15 +10,22 @@ Original file is located at
 # from google.colab import drive
 # drive.mount('/content/drive')
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sentence_transformers import SentenceTransformer
-import json
-from pinecone import Pinecone, ServerlessSpec
-import faiss
 import os
+import faiss
+import json
+import torch
+import pinecone
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import streamlit as st
+import matplotlib.pyplot as plt
+from transformers import pipeline
+from transformers import AutoTokenizer
+from pinecone import Pinecone, ServerlessSpec
+from transformers import pipeline as hf_pipeline
+from sentence_transformers import SentenceTransformer
+
 
 data = pd.read_csv("ESConv.csv")
 
