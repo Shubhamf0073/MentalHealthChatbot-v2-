@@ -7,11 +7,18 @@ Original file is located at
     https://colab.research.google.com/drive/1B98c7hkUh53dduxHwmQE669uF6Ibro_x
 """
 
-from google.colab import drive
-drive.mount('/content/drive')
+# from google.colab import drive
+# drive.mount('/content/drive')
 
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sentence_transformers import SentenceTransformer
+import json
+from pinecone import Pinecone, ServerlessSpec
+import faiss
+import os
 
 data = pd.read_csv("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/ESConv.csv")
 
@@ -22,9 +29,6 @@ data.info()
 data.isnull().sum()
 
 data["emotion_type"].value_counts()
-
-import seaborn as sns
-import matplotlib.pyplot as plt
 
 sns.countplot(data = data, x = "emotion_type")
 plt.xticks(rotation = 45)
@@ -62,9 +66,6 @@ for col in ["situation", "content"]:
 
 data["content"].head()
 
-import json
-import os
-
 json_path = "/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/FailedESConv.json"
 
 with open(json_path) as f:
@@ -87,18 +88,14 @@ def combine_conversation(conv):
 
 conversations = [combine_conversation(conv) for conv in Data]
 
-!pip install sentence-transformers
-
-from sentence_transformers import SentenceTransformer
+# !pip install sentence-transformers
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 conversation_embeddings = model.encode(conversations, show_progress_bar = True)
 np.save("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/conversation_embeddings.npy", conversation_embeddings)
 
-!pip install faiss-cpu
-
-import faiss
+# !pip install faiss-cpu
 
 conversation_embeddings = np.load("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/conversation_embeddings.npy")
 
@@ -114,11 +111,7 @@ def retrive_context(query, top_k = 1):
 
     return [conversations[idx] for idx in indices[0]]
 
-!pip install pinecone-client
-
-from pinecone import Pinecone, ServerlessSpec
-import os
-
+# !pip install pinecone-client
 pc = Pinecone(api_key = "pcsk_7UjC6j_G3F7vu1GjfD9MQpNNFmkSBieGQBmfsK29JqyvZK23aimzbzG1AKrSbf9aefGeaa")
 
 index_name = "emotional-support"
@@ -145,10 +138,7 @@ def retreive_context(query, top_k = 1):
 
     return [match["id"] for match in result["matches"]]
 
-!pip install transformers
-
-from transformers import pipeline
-import torch
+# !pip install transformers
 
 emotional_model = pipeline("text-classification", model = "j-hartmann/emotion-english-distilroberta-base")
 
@@ -187,7 +177,6 @@ def retrieve_context(query, emotion, top_k=1):
 
     return "\n---\n".join(retrieved)
 
-from transformers import AutoTokenizer
 tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
 
 def trim_prompt(prompt, max_tokens=512):
@@ -196,7 +185,6 @@ def trim_prompt(prompt, max_tokens=512):
         tokens = tokens[-max_tokens:]
     return tokenizer.decode(tokens, skip_special_tokens=True)
 
-from transformers import pipeline as hf_pipeline
 summarizer = hf_pipeline("summarization", model="facebook/bart-large-cnn")
 
 def summarize_context(context, max_length=50):
@@ -235,8 +223,6 @@ def generate_response(context, query, emotion):
         generated_text = generated_text.split("Answer:", 1)[-1].strip()
 
     return generated_text
-
-import json
 
 def collect_feedback(response, user_rating):
     """
@@ -314,11 +300,9 @@ response = process_query("I'm feeling really low today.")
 print("\nFinal Response to User:")
 print(response)
 
-!pip install streamlit pyngrok
-!pip install pinecone-client
+# !pip install streamlit pyngrok
+# !pip install pinecone-client
 
-import streamlit as st
-import pinecone
 
 # Initialize pipelines
 emotional_model = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
