@@ -73,7 +73,7 @@ for col in ["situation", "content"]:
 
 data["content"].head()
 
-json_path = "/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/FailedESConv.json"
+json_path = "FailedESConv.json"
 
 with open(json_path) as f:
     Data = json.load(f)
