@@ -20,7 +20,7 @@ from pinecone import Pinecone, ServerlessSpec
 import faiss
 import os
 
-data = pd.read_csv("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/ESConv.csv")
+data = pd.read_csv("ESConv.csv")
 
 data.head()
 
