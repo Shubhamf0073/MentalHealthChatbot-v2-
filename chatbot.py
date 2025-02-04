@@ -100,7 +100,7 @@ conversations = [combine_conversation(conv) for conv in Data]
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 conversation_embeddings = model.encode(conversations, show_progress_bar = True)
-np.save("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/conversation_embeddings.npy", conversation_embeddings)
+np.save("conversation_embeddings.npy", conversation_embeddings)
 
 # !pip install faiss-cpu
 
