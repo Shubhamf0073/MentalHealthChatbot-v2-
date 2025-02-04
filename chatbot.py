@@ -246,11 +246,11 @@ def collect_feedback(response, user_rating):
 
 #!pip install --upgrade transformers huggingface_hub
 
-generator = pipeline(
-    "text-generation",
-    model="EleutherAI/gpt-neo-2.7B",
-    torch_dtype=torch.float16
-)
+# generator = pipeline(
+#     "text-generation",
+#     model="EleutherAI/gpt-neo-2.7B",
+#     torch_dtype=torch.float16
+# )
 
 # Initialize the summarizer model (choose one that fits your use case)
 summarizer = hf_pipeline("summarization", model="facebook/bart-large-cnn")
@@ -259,53 +259,53 @@ def summarize_context(context, max_length=50):
     summary = summarizer(context, max_length=max_length, min_length=25, do_sample=False)
     return summary[0]['summary_text']
 
-def process_query(query, user_rating=None):
-    # Step 1: Emotion Recognition Agent
-    emotion = get_emotion(query)
-    print(f"[ERA] Detected Emotion: {emotion}")
+# def process_query(query, user_rating=None):
+#     # Step 1: Emotion Recognition Agent
+#     emotion = get_emotion(query)
+#     print(f"[ERA] Detected Emotion: {emotion}")
 
-    # Step 2: Retrieve full context from your dataset
-    context = retrieve_context(query, emotion, top_k=1)
-    print(f"[CRA] Retrieved Context:\n{context}")
+#     # Step 2: Retrieve full context from your dataset
+#     context = retrieve_context(query, emotion, top_k=1)
+#     print(f"[CRA] Retrieved Context:\n{context}")
 
-    # Step 3: Summarize the retrieved context
-    context_summary = summarize_context(context, max_length=50)
-    print(f"[Summary] Context Summary: {context_summary}")
+#     # Step 3: Summarize the retrieved context
+#     context_summary = summarize_context(context, max_length=50)
+#     print(f"[Summary] Context Summary: {context_summary}")
 
-    # Step 4: Response Generation Agent using the summarized context
-    prompt = (
-        f"Context: {context_summary}\n"
-        f"User Query: {query}\n"
-        f"Emotion: {emotion}\n"
-        "Generate a 2-3 sentence empathetic response that validates the user's feelings and offers supportive advice."
-    )
+#     # Step 4: Response Generation Agent using the summarized context
+#     prompt = (
+#         f"Context: {context_summary}\n"
+#         f"User Query: {query}\n"
+#         f"Emotion: {emotion}\n"
+#         "Generate a 2-3 sentence empathetic response that validates the user's feelings and offers supportive advice."
+#     )
 
-    # Optionally trim the prompt if it's too long (using your trim_prompt function)
-    prompt = trim_prompt(prompt, max_tokens=512)
+#     # Optionally trim the prompt if it's too long (using your trim_prompt function)
+#     prompt = trim_prompt(prompt, max_tokens=512)
 
-    response = generator(
-        prompt,
-        max_new_tokens=100,
-        num_return_sequences=1,
-        truncation=True,
-        temperature=0.9,
-        top_p=0.95
-    )
+#     response = generator(
+#         prompt,
+#         max_new_tokens=100,
+#         num_return_sequences=1,
+#         truncation=True,
+#         temperature=0.9,
+#         top_p=0.95
+#     )
 
-    final_response = response[0]["generated_text"]
-    print(f"[RGA] Generated Response:\n{final_response}")
+#     final_response = response[0]["generated_text"]
+#     print(f"[RGA] Generated Response:\n{final_response}")
 
-    # Step 5: Learning Agent - Collect feedback if provided.
-    if user_rating is not None:
-        collect_feedback(final_response, user_rating)
-        print("[LA] Feedback collected.")
+#     # Step 5: Learning Agent - Collect feedback if provided.
+#     if user_rating is not None:
+#         collect_feedback(final_response, user_rating)
+#         print("[LA] Feedback collected.")
 
-    return final_response
+#     return final_response
 
-# Example usage:
-response = process_query("I'm feeling really low today.")
-print("\nFinal Response to User:")
-print(response)
+# # Example usage:
+# response = process_query("I'm feeling really low today.")
+# print("\nFinal Response to User:")
+# print(response)
 
 # !pip install streamlit pyngrok
 # !pip install pinecone-client
