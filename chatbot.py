@@ -104,7 +104,7 @@ np.save("conversation_embeddings.npy", conversation_embeddings)
 
 # !pip install faiss-cpu
 
-conversation_embeddings = np.load("/content/drive/MyDrive/MentalHealthChatbot(v2)/Data/conversation_embeddings.npy")
+conversation_embeddings = np.load("conversation_embeddings.npy")
 
 dimension = conversation_embeddings.shape[1]
 index = faiss.IndexFlatL2(dimension)
