@@ -27,7 +27,7 @@ from transformers import pipeline as hf_pipeline
 from sentence_transformers import SentenceTransformer
 
 
-data = pd.read_csv("ESConv.csv")
+data = pd.read_csv("/Users/shubhamfufal/Chatbot(v2)/MentalHealthChatbot-v2-/ESConv.csv")
 
 data.head()
 
@@ -104,7 +104,7 @@ np.save("conversation_embeddings.npy", conversation_embeddings)
 
 # !pip install faiss-cpu
 
-conversation_embeddings = np.load("conversation_embeddings.npy")
+conversation_embeddings = np.load("/Users/shubhamfufal/Chatbot(v2)/MentalHealthChatbot-v2-/conversation_embeddings.npy")
 
 dimension = conversation_embeddings.shape[1]
 index = faiss.IndexFlatL2(dimension)
@@ -244,13 +244,13 @@ def collect_feedback(response, user_rating):
         json.dump(feedback_data, f)
         f.write("\n")
 
-#!pip install --upgrade transformers huggingface_hub
+# pip install --upgrade transformers huggingface_hub
 
-# generator = pipeline(
-#     "text-generation",
-#     model="EleutherAI/gpt-neo-2.7B",
-#     torch_dtype=torch.float16
-# )
+generator = pipeline(
+    "text-generation",
+    model="EleutherAI/gpt-neo-2.7B",
+    torch_dtype=torch.float16
+)
 
 # Initialize the summarizer model (choose one that fits your use case)
 summarizer = hf_pipeline("summarization", model="facebook/bart-large-cnn")
@@ -259,146 +259,146 @@ def summarize_context(context, max_length=50):
     summary = summarizer(context, max_length=max_length, min_length=25, do_sample=False)
     return summary[0]['summary_text']
 
-# def process_query(query, user_rating=None):
-#     # Step 1: Emotion Recognition Agent
-#     emotion = get_emotion(query)
-#     print(f"[ERA] Detected Emotion: {emotion}")
+def process_query(query, user_rating=None):
+    # Step 1: Emotion Recognition Agent
+    emotion = get_emotion(query)
+    print(f"[ERA] Detected Emotion: {emotion}")
 
-#     # Step 2: Retrieve full context from your dataset
-#     context = retrieve_context(query, emotion, top_k=1)
-#     print(f"[CRA] Retrieved Context:\n{context}")
+    # Step 2: Retrieve full context from your dataset
+    context = retrieve_context(query, emotion, top_k=1)
+    print(f"[CRA] Retrieved Context:\n{context}")
 
-#     # Step 3: Summarize the retrieved context
-#     context_summary = summarize_context(context, max_length=50)
-#     print(f"[Summary] Context Summary: {context_summary}")
+    # Step 3: Summarize the retrieved context
+    context_summary = summarize_context(context, max_length=50)
+    print(f"[Summary] Context Summary: {context_summary}")
 
-#     # Step 4: Response Generation Agent using the summarized context
-#     prompt = (
-#         f"Context: {context_summary}\n"
-#         f"User Query: {query}\n"
-#         f"Emotion: {emotion}\n"
-#         "Generate a 2-3 sentence empathetic response that validates the user's feelings and offers supportive advice."
-#     )
-
-#     # Optionally trim the prompt if it's too long (using your trim_prompt function)
-#     prompt = trim_prompt(prompt, max_tokens=512)
-
-#     response = generator(
-#         prompt,
-#         max_new_tokens=100,
-#         num_return_sequences=1,
-#         truncation=True,
-#         temperature=0.9,
-#         top_p=0.95
-#     )
-
-#     final_response = response[0]["generated_text"]
-#     print(f"[RGA] Generated Response:\n{final_response}")
-
-#     # Step 5: Learning Agent - Collect feedback if provided.
-#     if user_rating is not None:
-#         collect_feedback(final_response, user_rating)
-#         print("[LA] Feedback collected.")
-
-#     return final_response
-
-# # Example usage:
-# response = process_query("I'm feeling really low today.")
-# print("\nFinal Response to User:")
-# print(response)
-
-# !pip install streamlit pyngrok
-# !pip install pinecone-client
-
-
-# Initialize pipelines
-emotional_model = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-generator = pipeline(
-    "text-generation", model="EleutherAI/gpt-neo-2.7B", torch_dtype=torch.float16
-)
-
-# Initialize Pinecone
-pinecone.init(api_key="YOUR_PINECONE_API_KEY", environment="YOUR_ENVIRONMENT")
-index = pinecone.Index("emotional-support")
-
-# Functions
-
-def get_emotion(text):
-    result = emotional_model(text)
-    return result[0]["label"]
-
-def retrieve_context(query, emotion, top_k=1):
-    query_embedding = model.encode([query]).tolist()
-    result = index.query(query_embedding, top_k=top_k, include_metadata=True)
-    return [match["metadata"]["text"] for match in result["matches"]]
-
-def summarize_context(context, max_length=50):
-    summary = summarizer(context, max_length=max_length, min_length=25, do_sample=False)
-    return summary[0]['summary_text']
-
-def trim_prompt(prompt, max_tokens=512):
-    tokens = tokenizer(prompt, return_tensors="pt")["input_ids"][0]
-    if len(tokens) > max_tokens:
-        tokens = tokens[-max_tokens:]
-    return tokenizer.decode(tokens, skip_special_tokens=True)
-
-def generate_response(context, query, emotion):
-    context_summary = summarize_context(context, max_length=20)
+    # Step 4: Response Generation Agent using the summarized context
     prompt = (
-        f"{context_summary}\n"
-        f"{query}\n"
-        f"{emotion}\n\n"
-        "Generate a concise, empathetic response (2-3 sentences) that validates the user's feelings and offers supportive advice.\n"
-        "Answer:"
+        f"Context: {context_summary}\n"
+        f"User Query: {query}\n"
+        f"Emotion: {emotion}\n"
+        "Generate a 2-3 sentence empathetic response that validates the user's feelings and offers supportive advice."
     )
+
+    # Optionally trim the prompt if it's too long (using your trim_prompt function)
     prompt = trim_prompt(prompt, max_tokens=512)
+
     response = generator(
         prompt,
         max_new_tokens=100,
         num_return_sequences=1,
         truncation=True,
-        temperature=0.95,
-        top_p=0.9
+        temperature=0.9,
+        top_p=0.95
     )
-    generated_text = response[0]["generated_text"]
-    if "Answer:" in generated_text:
-        generated_text = generated_text.split("Answer:", 1)[-1].strip()
-    return generated_text
 
-def collect_feedback(response, user_rating):
-    feedback_data = {"response": response, "user_rating": user_rating}
-    with open("feedback.json", "a") as f:
-        json.dump(feedback_data, f)
-        f.write("\n")
+    final_response = response[0]["generated_text"]
+    print(f"[RGA] Generated Response:\n{final_response}")
 
-# Streamlit App
-st.title("Empathetic Chatbot")
-st.write("This chatbot detects your emotions and provides an empathetic response to your query.")
+    # Step 5: Learning Agent - Collect feedback if provided.
+    if user_rating is not None:
+        collect_feedback(final_response, user_rating)
+        print("[LA] Feedback collected.")
 
-query = st.text_input("How are you feeling today?", placeholder="Type your thoughts here...")
+    return final_response
 
-if st.button("Get Response"):
-    if query:
-        # Step 1: Emotion Detection
-        emotion = get_emotion(query)
-        st.write(f"**Detected Emotion:** {emotion}")
+# Example usage:
+response = process_query("I'm feeling really low today.")
+print("\nFinal Response to User:")
+print(response)
 
-        # Step 2: Context Retrieval
-        context = retrieve_context(query, emotion, top_k=1)
-        st.write("**Relevant Context Retrieved:**", context)
+# !pip install streamlit pyngrok
+# !pip install pinecone-client
 
-        # Step 3: Generate Response
-        response = generate_response(context, query, emotion)
-        st.write("**Chatbot Response:**")
-        st.success(response)
 
-        # Feedback Section
-        st.write("### Provide Feedback")
-        user_rating = st.slider("Rate the response (1 - 5):", 1, 5, value=3)
-        if st.button("Submit Feedback"):
-            collect_feedback(response, user_rating)
-            st.success("Thank you for your feedback!")
-    else:
-        st.warning("Please enter a query to proceed.")
+# # Initialize pipelines
+# emotional_model = pipeline("text-classification", model="j-hartmann/emotion-english-distilroberta-base")
+# summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+# generator = pipeline(
+#     "text-generation", model="EleutherAI/gpt-neo-2.7B", torch_dtype=torch.float16
+# )
+
+# # Initialize Pinecone
+# pinecone.init(api_key="YOUR_PINECONE_API_KEY", environment="YOUR_ENVIRONMENT")
+# index = pinecone.Index("emotional-support")
+
+# # Functions
+
+# def get_emotion(text):
+#     result = emotional_model(text)
+#     return result[0]["label"]
+
+# def retrieve_context(query, emotion, top_k=1):
+#     query_embedding = model.encode([query]).tolist()
+#     result = index.query(query_embedding, top_k=top_k, include_metadata=True)
+#     return [match["metadata"]["text"] for match in result["matches"]]
+
+# def summarize_context(context, max_length=50):
+#     summary = summarizer(context, max_length=max_length, min_length=25, do_sample=False)
+#     return summary[0]['summary_text']
+
+# def trim_prompt(prompt, max_tokens=512):
+#     tokens = tokenizer(prompt, return_tensors="pt")["input_ids"][0]
+#     if len(tokens) > max_tokens:
+#         tokens = tokens[-max_tokens:]
+#     return tokenizer.decode(tokens, skip_special_tokens=True)
+
+# def generate_response(context, query, emotion):
+#     context_summary = summarize_context(context, max_length=20)
+#     prompt = (
+#         f"{context_summary}\n"
+#         f"{query}\n"
+#         f"{emotion}\n\n"
+#         "Generate a concise, empathetic response (2-3 sentences) that validates the user's feelings and offers supportive advice.\n"
+#         "Answer:"
+#     )
+#     prompt = trim_prompt(prompt, max_tokens=512)
+#     response = generator(
+#         prompt,
+#         max_new_tokens=100,
+#         num_return_sequences=1,
+#         truncation=True,
+#         temperature=0.95,
+#         top_p=0.9
+#     )
+#     generated_text = response[0]["generated_text"]
+#     if "Answer:" in generated_text:
+#         generated_text = generated_text.split("Answer:", 1)[-1].strip()
+#     return generated_text
+
+# def collect_feedback(response, user_rating):
+#     feedback_data = {"response": response, "user_rating": user_rating}
+#     with open("feedback.json", "a") as f:
+#         json.dump(feedback_data, f)
+#         f.write("\n")
+
+# # Streamlit App
+# st.title("Empathetic Chatbot")
+# st.write("This chatbot detects your emotions and provides an empathetic response to your query.")
+
+# query = st.text_input("How are you feeling today?", placeholder="Type your thoughts here...")
+
+# if st.button("Get Response"):
+#     if query:
+#         # Step 1: Emotion Detection
+#         emotion = get_emotion(query)
+#         st.write(f"**Detected Emotion:** {emotion}")
+
+#         # Step 2: Context Retrieval
+#         context = retrieve_context(query, emotion, top_k=1)
+#         st.write("**Relevant Context Retrieved:**", context)
+
+#         # Step 3: Generate Response
+#         response = generate_response(context, query, emotion)
+#         st.write("**Chatbot Response:**")
+#         st.success(response)
+
+#         # Feedback Section
+#         st.write("### Provide Feedback")
+#         user_rating = st.slider("Rate the response (1 - 5):", 1, 5, value=3)
+#         if st.button("Submit Feedback"):
+#             collect_feedback(response, user_rating)
+#             st.success("Thank you for your feedback!")
+#     else:
+#         st.warning("Please enter a query to proceed.")
 
