@@ -10,7 +10,6 @@ def validate_json_object(json_string):
 
 def fix_json_object(json_string):
     try:
-        # Attempt to fix common errors
         # 1. Remove trailing commas
         json_string = re.sub(r",\s*([\}\]])", r"\1", json_string)
         
@@ -56,8 +55,6 @@ def process_json_file(file_path, output_path):
     print(f"Fixed JSON saved to {output_path}")
 
 if __name__ == "__main__":
-    # Replace 'input.json' with your actual input file path
-    # Replace 'output.json' with your desired output file path
     input_file = "/Users/shubhamfufal/Chatbot(v2)/MentalHealthChatbot-v2-/mental_health_counseling_conversations.json"
     output_file = "output.json"
     
