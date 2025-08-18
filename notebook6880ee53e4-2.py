@@ -296,9 +296,8 @@ class LightningModel(pl.LightningModule):
         #     from peft import PrefixTuningConfig, get_peft_model
         #     prefix_config = PrefixTuningConfig(
         #         task_type=TaskType.SEQ_2_SEQ_LM,
-        #         num_virtual_tokens=20,       # number of virtual tokens (tweak this as needed)
-        #         # prefix_tuning_init_std=0.02,   # initialization std; you can experiment with this
-        #         # You can add other hyperparameters if available and needed
+        #         num_virtual_tokens=20,       
+        #         # prefix_tuning_init_std=0.02,
         #     )
         #     self.model = get_peft_model(self.model, prefix_config)
 
@@ -372,7 +371,7 @@ class LightningModel(pl.LightningModule):
 
     def configure_optimizers(self):
         no_decay = ["bias", "LayerNorm.weight"]
-        params = self.model.named_parameters()  # Use self.model instead of self.trainer.model
+        params = self.model.named_parameters()  
         optimizer_grouped_parameters = [
             {
                 "params": [p for n, p in params if not any(nd in n for nd in no_decay)],
@@ -392,7 +391,7 @@ class LightningModel(pl.LightningModule):
                 "scheduler": scheduler,
                 "interval": "epoch",
                 "frequency": 1,
-                "monitor": "loss",  # You can log loss as your metric here
+                "monitor": "loss",  
             },
         }
 
@@ -512,7 +511,7 @@ from datasets import load_dataset
 import torch
 from nltk.translate.bleu_score import corpus_bleu
 
-# Load the evaluation dataset
+# evaluation dataset
 eval_dataset = TextToTextDataset(
     path=args.data_path,
     tokenizer=model.tokenizer,
@@ -520,11 +519,11 @@ eval_dataset = TextToTextDataset(
     max_target_length=args.max_target_length,
 )
 
-# Define the number of samples to remove
+# number of samples to remove
 num_samples_to_remove = 1500  # Assuming this is the number of samples to remove
 eval_dataset.data.samples = eval_dataset.data.samples[500:520]
 
-# Define a function to generate responses using the model
+# function to generate responses using the model
 def generate_responses(model, dataset):
     generated_responses = []
     for i in range(len(dataset)):
@@ -543,27 +542,26 @@ def generate_responses(model, dataset):
         generated_responses.append(output_ids.squeeze(0).tolist())
     return generated_responses
 
-# Generate responses using the finetuned model
+# Generating responses using the finetuned model
 generated_responses = generate_responses(model, eval_dataset)
 
-# Convert generated responses back to text
+# Converting generated responses back to text
 generated_texts = [model.tokenizer.decode(ids, skip_special_tokens=True) for ids in generated_responses]
 
-# Load reference target texts
+# reference target texts
 target_texts = [sample.target for sample in eval_dataset.data.samples]
 
-# Compute BLEU score
+# BLEU score
 bleu_score = corpus_bleu([[text] for text in target_texts], generated_texts)
 print("BLEU Score:", bleu_score)
 # print(f"Generated Texts: {generated_texts}")
 # print(f"Target texts:{target_texts}")
 
-# Save the model
+# Saving the model
 model.model.save_pretrained("/content/saved_model") # Save to a specific location
 model.tokenizer.save_pretrained("/content/saved_model") # Save tokenizer
 print("Model saved to /content/saved_model")
 
-# prompt: add code below to test saved model with custom input
 
 from transformers import pipeline
 
@@ -581,18 +579,15 @@ print(generated_text[0]['generated_text'])
 
 !pip install streamlit pyngrok
 
-# Create a `app.py` file
 app_code = """
 import streamlit as st
 import torch
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
 
-# Load the saved model and tokenizer
 model_path = "/content/saved_model"
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 model = AutoModelForSeq2SeqLM.from_pretrained(model_path)
 
-# Set the model to evaluation mode
 model.eval()
 
 # Streamlit UI
@@ -601,7 +596,7 @@ st.title("Mental Health Support Chatbot")
 # Input text box for user input
 user_input = st.text_input("HI, How may I help you?: ", "")
 
-# Generate response when the user inputs text
+# Generates a response when the user inputs text
 if user_input:
     # Tokenize the input
     input_ids = tokenizer(user_input, return_tensors="pt").input_ids
@@ -617,21 +612,15 @@ if user_input:
     st.text_area("Bot:", value=response, height=100)
 """
 
-# Write the Streamlit app to a Python file
 with open("app.py", "w") as f:
     f.write(app_code)
 
-# Start Streamlit in the background
 get_ipython().system_raw('streamlit run app.py &')
 
-# Use ngrok to create a public URL
 from pyngrok import ngrok
 
 ngrok.kill()
 
-!ngrok authtoken 2tB6s45MGSybRW0gdePY8Uar8WT_4kdsMHh67AogfbZXaj5Gh
-
-# Kill any previous tunnels (to avoid port conflicts)
 #ngrok.kill()
 
 # Create a new tunnel
